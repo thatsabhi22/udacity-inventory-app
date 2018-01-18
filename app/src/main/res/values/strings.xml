@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">udacity-inventory-app</string>
+    <string name="app_title">Leaf Inventory App</string>
 </resources>
