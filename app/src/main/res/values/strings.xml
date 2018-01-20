@@ -3,4 +3,10 @@
     <string name="app_title">Leaf Inventory App</string>
     <string name="empty_view_title_text">Its All Empty Here !!!</string>
     <string name="empty_view_subtitle_text">Try adding some products</string>
+    <string name="stock_unit_name"><![CDATA[<stock_unit_name>]]></string>
+    <string name="stock_unit_price"><![CDATA[<stock_unit_price>]]></string>
+    <string name="sale_button_text">Sale</string>
+    <string name="stock_unit_qty"><![CDATA[<quantity>]]></string>
+    <string name="stock_unit_qty_label">Available</string>
+    <string name="currency">₹ %128₹d</string>
 </resources>

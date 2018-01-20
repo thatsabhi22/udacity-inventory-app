@@ -16,7 +16,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".StockDetailActivity" />
+        <activity
+            android:name=".StockDetailActivity"
+            android:parentActivityName=".StockListActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".StockListActivity" />
+        </activity>
+        <provider
+            android:name=".data.StockProvider"
+            android:authorities="com.theleafapps.pro.stock"
+            android:exported="false" />
     </application>
 
 </manifest>
