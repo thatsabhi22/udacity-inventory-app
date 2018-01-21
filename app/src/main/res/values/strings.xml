@@ -22,4 +22,6 @@
     <string name="supplier_phone_label">Supplier Phone</string>
     <string name="product_image_label">Product Image</string>
     <string name="add_image_button_text">Add Image</string>
+    <string name="detail_activity_title_new_stock_unit">Add a Stock Unit</string>
+    <string name="detail_activity_title_edit_stock_unit">Edit Stock Unit</string>
 </resources>

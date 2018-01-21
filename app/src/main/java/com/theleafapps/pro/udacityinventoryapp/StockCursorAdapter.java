@@ -71,35 +71,27 @@ public class StockCursorAdapter extends CursorAdapter {
         ImageView stock_unit_image_view = (ImageView) view.findViewById(R.id.stock_image);
         Button saleButton = (Button) view.findViewById(R.id.sale_button);
 
-        // Find the columns of pet attributes that we're interested in
+        // Find the columns of stock attributes that we're interested in
         int idColumnIndex = cursor.getColumnIndex(StockEntry._ID);
         int nameColumnIndex = cursor.getColumnIndex(StockEntry.COLUMN_NAME);
         int priceColumnIndex = cursor.getColumnIndex(StockEntry.COLUMN_PRICE);
         int quantityColumnIndex = cursor.getColumnIndex(StockEntry.COLUMN_QUANTITY);
         int imageColumnIndex = cursor.getColumnIndex(StockEntry.COLUMN_IMAGE);
 
-        // Read the pet attributes from the Cursor for the current pet
+        // Read the stock attributes from the Cursor for the current stock
         final int stockId = cursor.getInt(idColumnIndex);
         String stockUnitName = cursor.getString(nameColumnIndex);
         float stockPrice = cursor.getFloat(priceColumnIndex);
         final int stockQuantity = cursor.getInt(quantityColumnIndex);
         String stockImageUri = cursor.getString(imageColumnIndex);
 
-        // Update the TextViews with the attributes for the current pet
+        // Update the TextViews with the attributes for the current stock
         stock_name_tv.setText(stockUnitName);
         stock_quantity_tv.setText(String.valueOf(stockQuantity));
         stock_unit_price.setText(String.valueOf(stockPrice));
         stock_unit_image_view.setImageURI(Uri.parse(stockImageUri));
 
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stockListActivity.clickOnViewItem(stockId);
-            }
-        });
-
         saleButton.setOnClickListener(new View.OnClickListener() {
-
             int updatedQuantity = stockQuantity - 1;
 
             @Override
