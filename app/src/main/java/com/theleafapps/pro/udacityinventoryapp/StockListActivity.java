@@ -1,8 +1,10 @@
 package com.theleafapps.pro.udacityinventoryapp;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
@@ -104,9 +106,28 @@ public class StockListActivity extends AppCompatActivity implements
         values.put(StockEntry.COLUMN_IMAGE, "android.resource://com.theleafapps.pro.udacityinventoryapp/drawable/pen");
 
         // Insert a new row for Toto into the provider using the ContentResolver.
-        // Use the {@link PetEntry#CONTENT_URI} to indicate that we want to insert
-        // into the pets database table.
-        // Receive the new content URI that will allow us to access Toto's data in the future.
+        // Use the {@link StockEntry#CONTENT_URI} to indicate that we want to insert
+        // into the stock database table.
         Uri newUri = getContentResolver().insert(StockEntry.CONTENT_URI, values);
+    }
+
+    public void clickOnViewItem(int id) {
+        Intent intent = new Intent(this, StockDetailActivity.class);
+        intent.putExtra("itemId", id);
+        startActivity(intent);
+    }
+
+    public void clickOnSale(long id, int quantity) {
+
+        ContentValues values = new ContentValues();
+        values.put(StockEntry._ID, id);
+        values.put(StockEntry.COLUMN_QUANTITY, quantity);
+        String selection = StockEntry._ID + "=?";
+        String[] selectionArgs = new String[]{String.valueOf(id)};
+
+        if(quantity >= 0) {
+            int rowsAffected = getContentResolver().update(StockEntry.CONTENT_URI, values, selection, selectionArgs);
+        }
+
     }
 }

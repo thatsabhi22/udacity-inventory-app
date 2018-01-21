@@ -200,11 +200,135 @@ public class StockProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+        // Get writeable database
+        SQLiteDatabase database = stockDbHelper.getWritableDatabase();
+
+        // Track the number of rows that were deleted
+        int rowsDeleted;
+
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case STOCK:
+                // Delete all rows that match the selection and selection args
+                rowsDeleted = database.delete(StockEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            case STOCK_ID:
+                // Delete a single row given by the ID in the URI
+                selection = StockEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                rowsDeleted = database.delete(StockEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            default:
+                throw new IllegalArgumentException("Deletion is not supported for " + uri);
+        }
+
+        // If 1 or more rows were deleted, then notify all listeners that the data at the
+        // given URI has changed
+        if (rowsDeleted != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        // Return the number of rows deleted
+        return rowsDeleted;
     }
 
     @Override
-    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+    public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String selection, @Nullable String[] selectionArgs) {
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case STOCK:
+                return updateStock(uri, contentValues, selection, selectionArgs);
+            case STOCK_ID:
+                // For the STOCK_ID code, extract out the ID from the URI,
+                // so we know which row to update. Selection will be "_id=?" and selection
+                // arguments will be a String array containing the actual ID.
+                selection = StockEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                return updateStock(uri, contentValues, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Update is not supported for " + uri);
+        }
+    }
+
+    /**
+     * Update stock in the database with the given content values. Apply the changes to the rows
+     * specified in the selection and selection arguments (which could be 0 or 1 or more stock).
+     * Return the number of rows that were successfully updated.
+     */
+    private int updateStock(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+
+        // If the {@link StockEntry#COLUMN_NAME} key is present,
+        // check that the name value is not null.
+        if (values.containsKey(StockEntry.COLUMN_NAME)) {
+            String name = values.getAsString(StockEntry.COLUMN_NAME);
+            if (name == null) {
+                throw new IllegalArgumentException("Stock Unit requires a name");
+            }
+        }
+
+        // If the {@link StockEntry#COLUMN_PRICE} key is present,
+        // check that the name value is not null.
+        if (values.containsKey(StockEntry.COLUMN_PRICE)) {
+            float price = values.getAsFloat(StockEntry.COLUMN_PRICE);
+            if (price == 0) {
+                throw new IllegalArgumentException("Stock Unit requires a price");
+            }
+        }
+
+        // If the {@link StockEntry#COLUMN_QUANTITY} key is present,
+        // check that the name value is not null.
+        if (values.containsKey(StockEntry.COLUMN_QUANTITY)) {
+            int quantity = values.getAsInteger(StockEntry.COLUMN_QUANTITY);
+            if (quantity < 0) {
+                throw new IllegalArgumentException("Stock Unit requires a quantity to be positive");
+            }
+        }
+
+        // If the {@link StockEntry#COLUMN_SUPPLIER_NAME} key is present,
+        // check that the name value is not null.
+        if (values.containsKey(StockEntry.COLUMN_SUPPLIER_NAME)) {
+            String supplierName = values.getAsString(StockEntry.COLUMN_SUPPLIER_NAME);
+            if (supplierName == null) {
+                throw new IllegalArgumentException("Supplier Name is required");
+            }
+        }
+
+        // If the {@link StockEntry#COLUMN_SUPPLIER_EMAIL} key is present,
+        // check that the name value is not null.
+        if (values.containsKey(StockEntry.COLUMN_SUPPLIER_EMAIL)) {
+            String supplierEmail = values.getAsString(StockEntry.COLUMN_SUPPLIER_EMAIL);
+            if (supplierEmail == null) {
+                throw new IllegalArgumentException("Supplier Email is required");
+            }
+        }
+
+        // If the {@link StockEntry#COLUMN_SUPPLIER_PHONE} key is present,
+        // check that the name value is not null.
+        if (values.containsKey(StockEntry.COLUMN_SUPPLIER_PHONE)) {
+            String supplierPhone = values.getAsString(StockEntry.COLUMN_SUPPLIER_PHONE);
+            if (supplierPhone == null) {
+                throw new IllegalArgumentException("Supplier Phone is required");
+            }
+        }
+
+        // If there are no values to update, then don't try to update the database
+        if (values.size() == 0) {
+            return 0;
+        }
+
+        // Otherwise, get writeable database to update the data
+        SQLiteDatabase database = stockDbHelper.getWritableDatabase();
+
+        // Returns the number of database rows affected by the update statement
+        int rowsUpdated = database.update(StockEntry.TABLE_NAME, values, selection, selectionArgs);
+
+        // If 1 or more rows were updated, then notify all listeners that the data at the
+        // given URI has changed
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        // Return the number of rows updated
+        return rowsUpdated;
     }
 }
