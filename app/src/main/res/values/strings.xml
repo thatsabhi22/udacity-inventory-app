@@ -9,4 +9,17 @@
     <string name="stock_unit_qty"><![CDATA[<quantity>]]></string>
     <string name="stock_unit_qty_label">Available</string>
     <string name="currency">₹ %128₹d</string>
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+    <string name="stock_unit_name_label">Stock Unit Name</string>
+    <string name="stock_unit_price_label">Stock Unit Price</string>
+    <string name="add_quantity">+</string>
+    <string name="subtract_quantity">-</string>
+    <string name="stock_quantity_label">Stock Quantity</string>
+    <string name="stock_price_label">Stock Price</string>
+    <string name="supplier_name_label">Supplier Name</string>
+    <string name="supplier_email_label">Supplier Email</string>
+    <string name="supplier_phone_label">Supplier Phone</string>
+    <string name="product_image_label">Product Image</string>
+    <string name="add_image_button_text">Add Image</string>
 </resources>
