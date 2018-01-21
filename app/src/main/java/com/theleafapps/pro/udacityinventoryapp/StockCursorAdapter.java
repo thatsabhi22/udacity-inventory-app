@@ -33,7 +33,7 @@ public class StockCursorAdapter extends CursorAdapter {
      * @param c       The cursor from which to get the data.
      */
     public StockCursorAdapter(StockListActivity context, Cursor c) {
-        super(context, c,0);
+        super(context, c, 0);
         this.stockListActivity = context;
     }
 
@@ -69,7 +69,7 @@ public class StockCursorAdapter extends CursorAdapter {
         TextView stock_quantity_tv = (TextView) view.findViewById(R.id.stock_unit_quantity);
         TextView stock_unit_price = (TextView) view.findViewById(R.id.stock_unit_price);
         ImageView stock_unit_image_view = (ImageView) view.findViewById(R.id.stock_image);
-        Button saleButton = (Button)view.findViewById(R.id.sale_button);
+        Button saleButton = (Button) view.findViewById(R.id.sale_button);
 
         // Find the columns of pet attributes that we're interested in
         int idColumnIndex = cursor.getColumnIndex(StockEntry._ID);
@@ -101,6 +101,7 @@ public class StockCursorAdapter extends CursorAdapter {
         saleButton.setOnClickListener(new View.OnClickListener() {
 
             int updatedQuantity = stockQuantity - 1;
+
             @Override
             public void onClick(View v) {
                 stockListActivity.clickOnSale(stockId,

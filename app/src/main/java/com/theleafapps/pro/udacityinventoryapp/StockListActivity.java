@@ -1,7 +1,6 @@
 package com.theleafapps.pro.udacityinventoryapp;
 
 import android.app.LoaderManager;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -125,7 +124,7 @@ public class StockListActivity extends AppCompatActivity implements
         String selection = StockEntry._ID + "=?";
         String[] selectionArgs = new String[]{String.valueOf(id)};
 
-        if(quantity >= 0) {
+        if (quantity >= 0) {
             int rowsAffected = getContentResolver().update(StockEntry.CONTENT_URI, values, selection, selectionArgs);
         }
 
