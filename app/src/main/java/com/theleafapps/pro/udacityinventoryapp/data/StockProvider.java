@@ -156,12 +156,12 @@ public class StockProvider extends ContentProvider {
         }
 
         float price = values.getAsFloat(StockEntry.COLUMN_PRICE);
-        if (price == 0) {
+        if (price < 0) {
             throw new IllegalArgumentException("Stock Unit requires a price");
         }
 
         int quantity = values.getAsInteger(StockEntry.COLUMN_QUANTITY);
-        if (quantity == 0) {
+        if (quantity < 0) {
             throw new IllegalArgumentException("Stock Unit requires a quantity");
         }
 

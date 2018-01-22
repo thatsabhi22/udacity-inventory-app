@@ -1,13 +1,19 @@
 package com.theleafapps.pro.udacityinventoryapp;
 
+import android.app.AlertDialog;
 import android.app.LoaderManager;
+import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -17,6 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.theleafapps.pro.udacityinventoryapp.data.StockContract.StockEntry;
 
@@ -82,6 +89,10 @@ public class StockDetailActivity extends AppCompatActivity implements
             return false;
         }
     };
+
+    public final static boolean isValidEmail(CharSequence target) {
+        return (!TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches());
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,6 +166,85 @@ public class StockDetailActivity extends AppCompatActivity implements
         });
     }
 
+    /**
+     * Get user input from editor and save stock unit into database.
+     */
+    private void saveStockUnit() {
+        // Read from input fields
+        // Use trim to eliminate leading or trailing white space
+        String name = stockUnitNameEditText.getText().toString().trim();
+        int quantity = Integer.parseInt(stockUnitQuantityEditText.getText().toString().trim());
+        float price = Float.parseFloat(stockUnitPriceEditText.getText().toString().trim());
+        String supplierName = supplierNameEditText.getText().toString().trim();
+        String supplierPhone = supplierPhoneEditText.getText().toString().trim();
+        String supplierEmail = supplierEmailEditText.getText().toString().trim();
+        String ImageURI = "android.resource://com.theleafapps.pro.udacityinventoryapp/";
+        //TODO Process Correct Image uri
+
+        if (TextUtils.isEmpty(name)) {
+            stockUnitNameEditText.setError("The Product Name cannot be blank");
+        } else if (price < 0.00) {
+            stockUnitPriceEditText.setError("The Stock Unit Price Cannot be less than Zero");
+        } else if (TextUtils.isEmpty(supplierName)) {
+            supplierNameEditText.setError("The Supplier Name cannot be blank");
+        } else if (TextUtils.isEmpty(supplierPhone)) {
+            supplierPhoneEditText.setError("The Supplier Phone cannot be blank");
+        } else if (TextUtils.isEmpty(supplierEmail)) {
+            supplierEmailEditText.setError("Please Enter a Supplier's Email Id");
+        } else if (!isValidEmail(supplierEmail)) {
+            supplierEmailEditText.setError("Please Enter a Valid Email Id");
+        } else {
+
+            // Create a ContentValues object where column names are the keys,
+            // and stock unit attributes from the editor are the values.
+            ContentValues values = new ContentValues();
+            values.put(StockEntry.COLUMN_NAME, name);
+            values.put(StockEntry.COLUMN_QUANTITY, quantity);
+            values.put(StockEntry.COLUMN_PRICE, price);
+            values.put(StockEntry.COLUMN_SUPPLIER_NAME, supplierName);
+            values.put(StockEntry.COLUMN_SUPPLIER_PHONE, supplierPhone);
+            values.put(StockEntry.COLUMN_SUPPLIER_EMAIL, supplierEmail);
+            values.put(StockEntry.COLUMN_IMAGE, ImageURI);
+
+            // Determine if this is a new or existing stock unit by checking if mCurrentStockUri is null or not
+            if (mCurrentStockUri == null) {
+                // This is a NEW stock unit, so insert a new stock unit into the provider,
+                // returning the content URI for the new stock unit.
+                Uri newUri = getContentResolver().insert(StockEntry.CONTENT_URI, values);
+
+                // Show a toast message depending on whether or not the insertion was successful.
+                if (newUri == null) {
+                    // If the new content URI is null, then there was an error with insertion.
+                    Toast.makeText(this, getString(R.string.editor_insert_stock_unit_failed),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    // Otherwise, the insertion was successful and we can display a toast.
+                    Toast.makeText(this, getString(R.string.editor_insert_stock_unit_successful),
+                            Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            } else {
+                // Otherwise this is an EXISTING stock unit, so update the stock unit with content URI: mCurrentStockUri
+                // and pass in the new ContentValues. Pass in null for the selection and selection args
+                // because mCurrentStockUri will already identify the correct row in the database that
+                // we want to modify.
+                int rowsAffected = getContentResolver().update(mCurrentStockUri, values, null, null);
+
+                // Show a toast message depending on whether or not the update was successful.
+                if (rowsAffected == 0) {
+                    // If no rows were affected, then there was an error with the update.
+                    Toast.makeText(this, getString(R.string.editor_update_stock_unit_failed),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    // Otherwise, the update was successful and we can display a toast.
+                    Toast.makeText(this, getString(R.string.editor_update_stock_unit_successful),
+                            Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu options from the res/menu/menu_editor.xml file.
@@ -169,15 +259,53 @@ public class StockDetailActivity extends AppCompatActivity implements
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-
+                saveStockUnit();
                 // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
-
+                // Pop up confirmation dialog for deletion
+                showDeleteConfirmationDialog();
                 // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
+                // If the stock unit hasn't changed, continue with navigating up to parent activity
+                // which is the {@link CatalogActivity}.
+                if (!mStockHasChanged) {
+                    NavUtils.navigateUpFromSameTask(StockDetailActivity.this);
+                    return true;
+                }
+
+                // Otherwise if there are unsaved changes, setup a dialog to warn the user.
+                // Create a click listener to handle the user confirming that
+                // changes should be discarded.
+                DialogInterface.OnClickListener discardButtonClickListener =
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // User clicked "Discard" button, navigate to parent activity.
+                                NavUtils.navigateUpFromSameTask(StockDetailActivity.this);
+                            }
+                        };
+
+                // Show a dialog that notifies the user they have unsaved changes
+                showUnsavedChangesDialog(discardButtonClickListener);
+                return true;
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * This method is called after invalidateOptionsMenu(), so that the
+     * menu can be updated (some menu items can be hidden or made visible).
+     */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        // If this is a new stock unit, hide the "Delete" menu item.
+        if (mCurrentStockUri == null) {
+            MenuItem menuItem = menu.findItem(R.id.action_delete);
+            menuItem.setVisible(false);
+        }
+        return true;
     }
 
     @Override
@@ -248,5 +376,115 @@ public class StockDetailActivity extends AppCompatActivity implements
         supplierNameEditText.setText("");
         supplierPhoneEditText.setText("");
         supplierEmailEditText.setText("");
+    }
+
+    /**
+     * Prompt the user to confirm that they want to delete this stock unit.
+     */
+    private void showDeleteConfirmationDialog() {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the positive and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Delete" button, so delete the stock unit.
+                deleteStockUnit();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Cancel" button, so dismiss the dialog
+                // and continue editing the stock unit.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    /**
+     * Show a dialog that warns the user there are unsaved changes that will be lost
+     * if they continue leaving the editor.
+     *
+     * @param discardButtonClickListener is the click listener for what to do when
+     *                                   the user confirms they want to discard their changes
+     */
+    private void showUnsavedChangesDialog(
+            DialogInterface.OnClickListener discardButtonClickListener) {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the positive and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.unsaved_changes_dialog_msg);
+        builder.setPositiveButton(R.string.discard, discardButtonClickListener);
+        builder.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Keep editing" button, so dismiss the dialog
+                // and continue editing the stock unit.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    /**
+     * This method is called when the back button is pressed.
+     */
+    @Override
+    public void onBackPressed() {
+        // If the stock unit hasn't changed, continue with handling back button press
+        if (!mStockHasChanged) {
+            super.onBackPressed();
+            return;
+        }
+
+        // Otherwise if there are unsaved changes, setup a dialog to warn the user.
+        // Create a click listener to handle the user confirming that changes should be discarded.
+        DialogInterface.OnClickListener discardButtonClickListener =
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // User clicked "Discard" button, close the current activity.
+                        finish();
+                    }
+                };
+
+        // Show dialog that there are unsaved changes
+        showUnsavedChangesDialog(discardButtonClickListener);
+    }
+
+    /**
+     * Perform the deletion of the stock unit in the database.
+     */
+    private void deleteStockUnit() {
+        // Only perform the delete if this is an existing stock unit.
+        if (mCurrentStockUri != null) {
+            // Call the ContentResolver to delete the stock unit at the given content URI.
+            // Pass in null for the selection and selection args because the mCurrentStockUri
+            // content URI already identifies the stock unit that we want.
+            int rowsDeleted = getContentResolver().delete(mCurrentStockUri, null, null);
+
+            // Show a toast message depending on whether or not the delete was successful.
+            if (rowsDeleted == 0) {
+                // If no rows were deleted, then there was an error with the delete.
+                Toast.makeText(this, getString(R.string.editor_delete_stock_unit_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the delete was successful and we can display a toast.
+                Toast.makeText(this, getString(R.string.editor_delete_stock_unit_successful),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+        // Close the activity
+        finish();
     }
 }

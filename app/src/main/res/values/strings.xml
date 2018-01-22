@@ -10,6 +10,7 @@
     <string name="stock_unit_qty_label">Available</string>
     <string name="currency">₹ %128₹d</string>
     <string name="action_save">Save</string>
+    <string name="action_add_dummy_product">Add Dummy Product</string>
     <string name="action_delete">Delete</string>
     <string name="stock_unit_name_label">Stock Unit Name</string>
     <string name="stock_unit_price_label">Stock Unit Price</string>
@@ -24,7 +25,20 @@
     <string name="add_image_button_text">Add Image</string>
     <string name="detail_activity_title_new_stock_unit">Add a Stock Unit</string>
     <string name="detail_activity_title_edit_stock_unit">Edit Stock Unit</string>
+    <string name="editor_insert_stock_unit_failed">Error with saving Stock Unit</string>
+    <string name="editor_insert_stock_unit_successful">Stock Unit saved</string>
+    <string name="editor_update_stock_unit_successful">Stock Unit updated</string>
+    <string name="editor_update_stock_unit_failed">Error with updating Stock Unit</string>
     <string name="default_zero">0</string>
     <string name="add_quantity_button">+</string>
     <string name="subtract_quantity_button">-</string>
+    <string name="stock_price_default_zero">0.00</string>
+    <string name="editor_delete_stock_unit_failed">Error with deleting stock unit</string>
+    <string name="editor_delete_stock_unit_successful">Stock Unit deleted</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_dialog_msg">Delete this Stock Unit ?</string>
+    <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
+    <string name="keep_editing">Keep Editing</string>
+    <string name="discard">Discard</string>
 </resources>
