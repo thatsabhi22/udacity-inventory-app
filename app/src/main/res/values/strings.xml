@@ -24,4 +24,7 @@
     <string name="add_image_button_text">Add Image</string>
     <string name="detail_activity_title_new_stock_unit">Add a Stock Unit</string>
     <string name="detail_activity_title_edit_stock_unit">Edit Stock Unit</string>
+    <string name="default_zero">0</string>
+    <string name="add_quantity_button">+</string>
+    <string name="subtract_quantity_button">-</string>
 </resources>

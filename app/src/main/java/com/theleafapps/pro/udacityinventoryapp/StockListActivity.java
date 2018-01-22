@@ -39,9 +39,9 @@ public class StockListActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Intent intent = new Intent(StockListActivity.this, StockDetailActivity.class);
-//                startActivity(intent);
-                insertStock();
+                Intent intent = new Intent(StockListActivity.this, StockDetailActivity.class);
+                startActivity(intent);
+                //insertStock();
             }
         });
 
@@ -134,7 +134,6 @@ public class StockListActivity extends AppCompatActivity implements
     }
 
     public void clickOnSale(long id, int quantity) {
-
         ContentValues values = new ContentValues();
         values.put(StockEntry._ID, id);
         values.put(StockEntry.COLUMN_QUANTITY, quantity);

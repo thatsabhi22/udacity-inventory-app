@@ -12,6 +12,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,56 +27,68 @@ public class StockDetailActivity extends AppCompatActivity implements
      * Identifier for the stock data loader
      */
     private static final int STOCK_LOADER = 1;
-
-    /**
-     * Content URI for the existing stock (null if it's a new stock unit)
-     */
-    private Uri mCurrentStockUri;
-
     /**
      * EditText field to enter the stock unit name
      */
     TextView stockUnitNameEditText;
-
     /**
      * EditText field to enter the stock quantity
      */
     TextView stockUnitQuantityEditText;
-
     /**
      * EditText field to enter the stock unit price
      */
     TextView stockUnitPriceEditText;
-
     /**
      * EditText field to enter the supplier name
      */
     TextView supplierNameEditText;
-
     /**
      * EditText field to enter the supplier phone
      */
     TextView supplierPhoneEditText;
-
     /**
      * EditText field to enter the stock email
      */
     TextView supplierEmailEditText;
-
     /**
      * ImageView for the stock image
      */
     ImageView productImageView;
-
+    /**
+     * Button for the increasing stock quantity
+     */
+    Button addQuantityButton;
+    /**
+     * Button for the decreasing stock quantity
+     */
+    Button subtractQuantityButton;
+    /**
+     * Content URI for the existing stock (null if it's a new stock unit)
+     */
+    private Uri mCurrentStockUri;
     /**
      * Boolean flag that keeps track of whether the stock has been edited (true) or not (false)
      */
     private boolean mStockHasChanged = false;
+    /**
+     * OnTouchListener that listens for any user touches on a View, implying that they are modifying
+     * the view, and we change the mStockHasChanged boolean to true.
+     */
+    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            mStockHasChanged = true;
+            return false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stock_detail);
+
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
         // Examine the intent that was used to launch this activity,
         // in order to figure out if we're creating a new stock unit or editing an existing one.
@@ -107,6 +121,8 @@ public class StockDetailActivity extends AppCompatActivity implements
         supplierPhoneEditText = (EditText) findViewById(R.id.supplier_phone_number);
         supplierEmailEditText = (EditText) findViewById(R.id.supplier_email);
         productImageView = (ImageView) findViewById(R.id.product_image_view);
+        addQuantityButton = (Button) findViewById(R.id.add_quantity_button);
+        subtractQuantityButton = (Button) findViewById(R.id.subtract_quantity_button);
 
         // Setup OnTouchListeners on all the input fields, so we can determine if the user
         // has touched or modified them. This will let us know if there are unsaved changes
@@ -117,6 +133,26 @@ public class StockDetailActivity extends AppCompatActivity implements
         supplierNameEditText.setOnTouchListener(mTouchListener);
         supplierPhoneEditText.setOnTouchListener(mTouchListener);
         supplierEmailEditText.setOnTouchListener(mTouchListener);
+
+        addQuantityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int currentValue = Integer.parseInt(stockUnitQuantityEditText.getText().toString());
+                int increasedValue = currentValue + 1;
+                stockUnitQuantityEditText.setText(String.valueOf(increasedValue));
+            }
+        });
+
+        subtractQuantityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int currentValue = Integer.parseInt(stockUnitQuantityEditText.getText().toString());
+                if (currentValue > 0) {
+                    int decreasedValue = currentValue - 1;
+                    stockUnitQuantityEditText.setText(String.valueOf(decreasedValue));
+                }
+            }
+        });
     }
 
     @Override
@@ -143,18 +179,6 @@ public class StockDetailActivity extends AppCompatActivity implements
         }
         return super.onOptionsItemSelected(item);
     }
-
-    /**
-     * OnTouchListener that listens for any user touches on a View, implying that they are modifying
-     * the view, and we change the mStockHasChanged boolean to true.
-     */
-    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            mStockHasChanged = true;
-            return false;
-        }
-    };
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -208,7 +232,7 @@ public class StockDetailActivity extends AppCompatActivity implements
 
             // Update the views on the screen with the values from the database
             stockUnitNameEditText.setText(stock_name);
-            stockUnitQuantityEditText.setText(quantity);
+            stockUnitQuantityEditText.setText(String.valueOf(quantity));
             stockUnitPriceEditText.setText(String.valueOf(stock_price));
             supplierNameEditText.setText(supplier_name);
             supplierPhoneEditText.setText(supplier_phone);
