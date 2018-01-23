@@ -74,6 +74,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/stock_quantity_label"
                 android:inputType="number"
+                android:enabled="false"
                 android:maxLength="10"
                 android:singleLine="true"
                 android:text="@string/default_zero"
