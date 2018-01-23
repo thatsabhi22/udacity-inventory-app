@@ -595,20 +595,21 @@ public class StockDetailActivity extends AppCompatActivity implements
      * Order More inventory menu item opens up the mail interface
      * to send email to the supplier email id
      */
-    private void orderMore(){
+    private void orderMore() {
         String stockUnitName = stockUnitNameEditText.getText().toString();
         String supplierEmail = supplierEmailEditText.getText().toString();
         String mailText = getString(R.string.mailText);
-        composeEmail(new String[]{supplierEmail},"Order for more" + stockUnitName,mailText);
+        composeEmail(new String[]{supplierEmail}, "Order for more" + stockUnitName, mailText);
     }
 
     /**
      * Prepares the Email intent to send email to supplier email id
+     *
      * @param addresses recipient email address
      * @param subject   subject of the email
      * @param mailText  body of the email
      */
-    public void composeEmail(String[] addresses, String subject,String mailText) {
+    public void composeEmail(String[] addresses, String subject, String mailText) {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         intent.setData(Uri.parse("mailto:")); // only email apps should handle this
         intent.putExtra(Intent.EXTRA_EMAIL, addresses);
