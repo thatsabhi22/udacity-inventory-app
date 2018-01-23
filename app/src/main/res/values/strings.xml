@@ -22,7 +22,7 @@
     <string name="supplier_email_label">Supplier Email</string>
     <string name="supplier_phone_label">Supplier Phone</string>
     <string name="product_image_label">Product Image</string>
-    <string name="add_image_button_text">Add Image</string>
+    <string name="add_image_button_text">Choose Image</string>
     <string name="detail_activity_title_new_stock_unit">Add a Stock Unit</string>
     <string name="detail_activity_title_edit_stock_unit">Edit Stock Unit</string>
     <string name="editor_insert_stock_unit_failed">Error with saving Stock Unit</string>
@@ -39,6 +39,9 @@
     <string name="cancel">Cancel</string>
     <string name="delete_dialog_msg">Delete this Stock Unit ?</string>
     <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
+    <string name="err_external_storage_permissions">Need permissions to get a product photo</string>
+    <string name="no_image_url">android.resource://com.theleafapps.pro.udacityinventoryapp/drawable/product_image</string>
+    <string name="no_image">"no images"</string>
     <string name="keep_editing">Keep Editing</string>
     <string name="discard">Discard</string>
 </resources>

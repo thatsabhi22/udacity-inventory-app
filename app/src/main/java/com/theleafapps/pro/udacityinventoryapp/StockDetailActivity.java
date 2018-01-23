@@ -1,5 +1,6 @@
 package com.theleafapps.pro.udacityinventoryapp;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentValues;
@@ -7,9 +8,13 @@ import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -27,9 +32,13 @@ import android.widget.Toast;
 
 import com.theleafapps.pro.udacityinventoryapp.data.StockContract.StockEntry;
 
+import java.io.File;
+
 public class StockDetailActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
+    public static final int PICK_PHOTO_REQUEST = 20;
+    public static final int EXTERNAL_STORAGE_REQUEST_PERMISSION_CODE = 21;
     /**
      * Identifier for the stock data loader
      */
@@ -67,6 +76,10 @@ public class StockDetailActivity extends AppCompatActivity implements
      */
     Button addQuantityButton;
     /**
+     * Button for the Adding Image of the stock unit
+     */
+    Button addImageButton;
+    /**
      * Button for the decreasing stock quantity
      */
     Button subtractQuantityButton;
@@ -78,6 +91,10 @@ public class StockDetailActivity extends AppCompatActivity implements
      * Boolean flag that keeps track of whether the stock has been edited (true) or not (false)
      */
     private boolean mStockHasChanged = false;
+    /**
+     * URI of the stock unit image
+     */
+    private String mCurrentPhotoUri = "no images";
     /**
      * OnTouchListener that listens for any user touches on a View, implying that they are modifying
      * the view, and we change the mStockHasChanged boolean to true.
@@ -134,6 +151,7 @@ public class StockDetailActivity extends AppCompatActivity implements
         productImageView = (ImageView) findViewById(R.id.product_image_view);
         addQuantityButton = (Button) findViewById(R.id.add_quantity_button);
         subtractQuantityButton = (Button) findViewById(R.id.subtract_quantity_button);
+        addImageButton = (Button) findViewById(R.id.add_image_button);
 
         // Setup OnTouchListeners on all the input fields, so we can determine if the user
         // has touched or modified them. This will let us know if there are unsaved changes
@@ -164,6 +182,13 @@ public class StockDetailActivity extends AppCompatActivity implements
                 }
             }
         });
+
+        addImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onPhotoProductUpdate(v);
+            }
+        });
     }
 
     /**
@@ -178,8 +203,6 @@ public class StockDetailActivity extends AppCompatActivity implements
         String supplierName = supplierNameEditText.getText().toString().trim();
         String supplierPhone = supplierPhoneEditText.getText().toString().trim();
         String supplierEmail = supplierEmailEditText.getText().toString().trim();
-        String ImageURI = "android.resource://com.theleafapps.pro.udacityinventoryapp/";
-        //TODO Process Correct Image uri
 
         if (TextUtils.isEmpty(name)) {
             stockUnitNameEditText.setError("The Product Name cannot be blank");
@@ -204,7 +227,7 @@ public class StockDetailActivity extends AppCompatActivity implements
             values.put(StockEntry.COLUMN_SUPPLIER_NAME, supplierName);
             values.put(StockEntry.COLUMN_SUPPLIER_PHONE, supplierPhone);
             values.put(StockEntry.COLUMN_SUPPLIER_EMAIL, supplierEmail);
-            values.put(StockEntry.COLUMN_IMAGE, ImageURI);
+            values.put(StockEntry.COLUMN_IMAGE, mCurrentPhotoUri);
 
             // Determine if this is a new or existing stock unit by checking if mCurrentStockUri is null or not
             if (mCurrentStockUri == null) {
@@ -260,11 +283,13 @@ public class StockDetailActivity extends AppCompatActivity implements
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
                 saveStockUnit();
-                // Respond to a click on the "Delete" menu option
+                break;
+            // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
                 // Pop up confirmation dialog for deletion
                 showDeleteConfirmationDialog();
-                // Respond to a click on the "Up" arrow button in the app bar
+                break;
+            // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
                 // If the stock unit hasn't changed, continue with navigating up to parent activity
                 // which is the {@link CatalogActivity}.
@@ -291,6 +316,64 @@ public class StockDetailActivity extends AppCompatActivity implements
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onPhotoProductUpdate(View view) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            //We are on M or above so we need to ask for runtime permissions
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                invokeGetPhoto();
+            } else {
+                // we are here if we do not all ready have permissions
+                String[] permisionRequest = {Manifest.permission.READ_EXTERNAL_STORAGE};
+                requestPermissions(permisionRequest, EXTERNAL_STORAGE_REQUEST_PERMISSION_CODE);
+            }
+        } else {
+            //We are on an older devices so we dont have to ask for runtime permissions
+            invokeGetPhoto();
+        }
+    }
+
+    private void invokeGetPhoto() {
+        // invoke the image gallery using an implict intent.
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+
+        // where do we want to find the data?
+        File pictureDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        String pictureDirectoryPath = pictureDirectory.getPath();
+        // finally, get a URI representation
+        Uri data = Uri.parse(pictureDirectoryPath);
+
+        // set the data and type.  Get all image types.
+        photoPickerIntent.setDataAndType(data, "image/*");
+
+        // we will invoke this activity, and get something back from it.
+        startActivityForResult(photoPickerIntent, PICK_PHOTO_REQUEST);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == EXTERNAL_STORAGE_REQUEST_PERMISSION_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            //We got a GO from the user
+            invokeGetPhoto();
+        } else {
+            Toast.makeText(this, R.string.err_external_storage_permissions, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PICK_PHOTO_REQUEST && resultCode == RESULT_OK) {
+            if (data != null) {
+                //If we are here, everything processed successfully and we have an Uri data
+                Uri mProductPhotoUri = data.getData();
+                mCurrentPhotoUri = mProductPhotoUri.toString();
+                //Log.d(TAG, "Selected images " + mProductPhotoUri);
+
+                productImageView.setImageURI(Uri.parse(mCurrentPhotoUri));
+            }
+        }
     }
 
     /**
@@ -357,6 +440,7 @@ public class StockDetailActivity extends AppCompatActivity implements
             String supplier_phone = cursor.getString(supplierPhoneColumnIndex);
             String supplier_email = cursor.getString(supplierEmailColumnIndex);
             String stock_image = cursor.getString(productImageColumnIndex);
+            mCurrentPhotoUri = stock_image;
 
             // Update the views on the screen with the values from the database
             stockUnitNameEditText.setText(stock_name);
@@ -365,6 +449,12 @@ public class StockDetailActivity extends AppCompatActivity implements
             supplierNameEditText.setText(supplier_name);
             supplierPhoneEditText.setText(supplier_phone);
             supplierEmailEditText.setText(supplier_email);
+
+            if (TextUtils.equals(stock_image, getString(R.string.no_image))) {
+                productImageView.setImageURI(Uri.parse(getString(R.string.no_image_url)));
+            } else {
+                productImageView.setImageURI(Uri.parse(stock_image));
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package com.theleafapps.pro.udacityinventoryapp;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,7 +90,11 @@ public class StockCursorAdapter extends CursorAdapter {
         stock_name_tv.setText(stockUnitName);
         stock_quantity_tv.setText(String.valueOf(stockQuantity));
         stock_unit_price.setText(String.valueOf(stockPrice));
-        stock_unit_image_view.setImageURI(Uri.parse(stockImageUri));
+        if (!TextUtils.equals(stockImageUri, stockListActivity.getString(R.string.no_image))) {
+            stock_unit_image_view.setImageURI(Uri.parse(stockImageUri));
+        } else {
+            stock_unit_image_view.setImageURI(Uri.parse(stockListActivity.getString(R.string.no_image_url)));
+        }
 
         saleButton.setOnClickListener(new View.OnClickListener() {
             int updatedQuantity = stockQuantity - 1;
