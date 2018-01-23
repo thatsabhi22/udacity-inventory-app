@@ -44,4 +44,6 @@
     <string name="no_image">"no images"</string>
     <string name="keep_editing">Keep Editing</string>
     <string name="discard">Discard</string>
+    <string name="action_order_more">Order More</string>
+    <string name="mailText">Please Send 25 more of the product specified.\n\nLeaf Inventory</string>
 </resources>

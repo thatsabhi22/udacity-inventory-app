@@ -37,7 +37,13 @@ import java.io.File;
 public class StockDetailActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
+    /**
+     * Constant for image request
+     */
     public static final int PICK_PHOTO_REQUEST = 20;
+    /**
+     * Permission Code for External Storage permission
+     */
     public static final int EXTERNAL_STORAGE_REQUEST_PERMISSION_CODE = 21;
     /**
      * Identifier for the stock data loader
@@ -289,6 +295,11 @@ public class StockDetailActivity extends AppCompatActivity implements
                 // Pop up confirmation dialog for deletion
                 showDeleteConfirmationDialog();
                 break;
+            // Respond to a click on the "Order More" menu option
+            case R.id.action_order_more:
+                // Pop up confirmation dialog for deletion
+                orderMore();
+                break;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
                 // If the stock unit hasn't changed, continue with navigating up to parent activity
@@ -383,10 +394,12 @@ public class StockDetailActivity extends AppCompatActivity implements
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        // If this is a new stock unit, hide the "Delete" menu item.
+        // If this is a new stock unit, hide the "Delete" as well as "Order More" menu item.
         if (mCurrentStockUri == null) {
-            MenuItem menuItem = menu.findItem(R.id.action_delete);
-            menuItem.setVisible(false);
+            MenuItem deleteMenuItem = menu.findItem(R.id.action_delete);
+            deleteMenuItem.setVisible(false);
+            MenuItem orderMoreMenuItem = menu.findItem(R.id.action_order_more);
+            orderMoreMenuItem.setVisible(false);
         }
         return true;
     }
@@ -576,5 +589,33 @@ public class StockDetailActivity extends AppCompatActivity implements
         }
         // Close the activity
         finish();
+    }
+
+    /**
+     * Order More inventory menu item opens up the mail interface
+     * to send email to the supplier email id
+     */
+    private void orderMore(){
+        String stockUnitName = stockUnitNameEditText.getText().toString();
+        String supplierEmail = supplierEmailEditText.getText().toString();
+        String mailText = getString(R.string.mailText);
+        composeEmail(new String[]{supplierEmail},"Order for more" + stockUnitName,mailText);
+    }
+
+    /**
+     * Prepares the Email intent to send email to supplier email id
+     * @param addresses recipient email address
+     * @param subject   subject of the email
+     * @param mailText  body of the email
+     */
+    public void composeEmail(String[] addresses, String subject,String mailText) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_EMAIL, addresses);
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.putExtra(Intent.EXTRA_TEXT, mailText);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 }
