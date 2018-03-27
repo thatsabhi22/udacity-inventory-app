@@ -1,5 +1,3 @@
-# udacity-inventory-app
-
 # Leaf Inventory
 
 ## Android Concepts
@@ -21,5 +19,8 @@
 - Includes a demo content (tap the cloud download icon in the action bar)
 
 # Screenshot
+
+![Alt text](/Screenshots/1.png?raw=true)
+![Alt text](/Screenshots/2.png?raw=true)
 
 
