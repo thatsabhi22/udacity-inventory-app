@@ -1,6 +1,8 @@
 # Leaf Inventory
 
-## Android Concepts
+An inventory management app, as a part of Udacity Android Program
+
+## Android Concepts Used
 
 - SQLite with OpenDbHelper
 - Cursors
