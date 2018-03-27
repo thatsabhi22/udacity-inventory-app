@@ -9,6 +9,7 @@ An inventory management app, as a part of Udacity Android Program
 - CursorAdapter
 - ListView
 - CRUD: Create, Read, Update and Delete database items
+- Content Provider
 - Android permissions
 
 # Description
